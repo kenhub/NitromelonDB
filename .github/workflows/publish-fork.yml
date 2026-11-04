@@ -1,0 +1,59 @@
+# Publishes the kenhub fork as @kenhub-gmbh/nitromelondb from a tag:
+#   git tag kenhub-v0.31.1-kenhub.1 && git push origin kenhub-v0.31.1-kenhub.1
+# The repository keeps upstream's package name; only the built dist/ is renamed,
+# so apps install it as "nitromelondb": "npm:@kenhub-gmbh/nitromelondb@<version>".
+name: Publish fork
+
+on:
+  push:
+    tags:
+      - 'kenhub-v*'
+
+permissions:
+  contents: read
+  # npm trusted publishing: the job proves its identity with an OIDC token
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.x
+          # No registry-url: setup-node would write an _authToken line and npm would skip OIDC
+          package-manager-cache: false
+
+      # trusted publishing needs npm 11.5 or newer
+      - name: Update npm
+        run: npm install -g npm@latest
+
+      - run: yarn install --immutable
+
+      - name: Check and build
+        run: |
+          yarn eslint
+          yarn typecheck
+          yarn test
+          yarn build
+
+      - name: Name and version the package after the tag
+        run: |
+          version="${GITHUB_REF_NAME#kenhub-v}"
+          node - "$version" <<'JS'
+          const fs = require('fs')
+          const pkg = JSON.parse(fs.readFileSync('dist/package.json', 'utf8'))
+          pkg.name = '@kenhub-gmbh/nitromelondb'
+          pkg.version = process.argv[2]
+          pkg.repository = { type: 'git', url: 'https://github.com/kenhub/NitromelonDB.git' }
+          fs.writeFileSync('dist/package.json', JSON.stringify(pkg, null, 2) + '\n')
+          console.log(`${pkg.name}@${pkg.version}`)
+          JS
+
+      # a prerelease version must name its dist-tag; consumers pin the exact version
+      - name: Publish
+        run: npm publish --access public --tag kenhub
+        working-directory: dist
