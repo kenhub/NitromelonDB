@@ -185,10 +185,6 @@ jobs:
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
       - run: yarn install --immutable
       - run: yarn dev:native &
-      - name: Disk watchdog (temporary diagnostic)
-        run: |
-          df -h /
-          nohup bash -c 'while true; do avail=$(df --output=avail -k / | tail -1); echo "$(date -u +%T) avail=${avail}KB" >> /tmp/disk.log; if [ "$avail" -lt 2000000 ]; then { echo LOW DISK; df -h; sudo du -xh --max-depth=4 / 2>/dev/null | sort -h | tail -80; ls -laS /tmp | head -30; } > /tmp/disk-report.txt 2>&1; pkill -f GradleDaemon; pkill -f gradlew; pkill -f qemu-system; break; fi; sleep 10; done' > /dev/null 2>&1 &
       - uses: gradle/actions/setup-gradle@v5
       # See: https://github.com/android/compose-samples/actions/runs/27015993/workflow for ideas for caching
       # android-emulator-runner runs each YAML line via `sh -c`, so keep this a single command.
@@ -198,12 +194,6 @@ jobs:
           api-level: 29
           working-directory: ./native/androidTest
           script: ./gradlew connectedAndroidTest
-      - name: Disk report (temporary diagnostic)
-        if: always()
-        run: |
-          df -h /
-          cat /tmp/disk.log || true
-          cat /tmp/disk-report.txt || true
       - run: yarn ktlint
   notesapp-android:
     needs: [eslint, typescript, ci-check]
