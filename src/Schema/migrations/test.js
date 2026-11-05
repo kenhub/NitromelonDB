@@ -197,6 +197,9 @@ describe('migration step functions', () => {
     expect(() => destroyTable({ table: 'bad"name' })).toThrow('Unsafe name')
     expect(() => destroyTable({ table: 'bad name' })).toThrow('Unsafe name')
     expect(() => destroyTable({ table: 'sqlite_master' })).toThrow('Unsafe name')
+    expect(() => destroyTable({ table: 'id' })).toThrow('reserved')
+    expect(() => destroyTable({ table: '_STATUS' })).toThrow('reserved')
+    expect(() => destroyTable({ table: '_changed' })).toThrow('reserved')
   })
 })
 

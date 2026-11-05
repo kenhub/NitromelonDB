@@ -4,7 +4,7 @@ import invariant from '../../utils/common/invariant'
 import isObj from '../../utils/fp/isObj'
 
 import type { ColumnSchema, TableName, TableSchema, TableSchemaSpec, SchemaVersion } from '../index'
-import { tableSchema, validateColumnSchema } from '../index'
+import { tableSchema, validateColumnSchema, validateName } from '../index'
 
 export type CreateTableMigrationStep = Readonly<{
   type: 'create_table'
@@ -151,10 +151,7 @@ export function destroyTable({ table }: { table: TableName }): DestroyTableMigra
       `local_storage is used internally by NitromelonDB and can't be destroyed`,
     )
     // same name rules as tableSchema(), since the name is interpolated into SQL
-    const checkName = (
-      require('../../utils/fp/checkName') as { default: (value: string) => string }
-    ).default
-    checkName(table)
+    validateName(table)
   }
   return { type: 'destroy_table', table }
 }
