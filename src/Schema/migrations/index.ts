@@ -151,6 +151,11 @@ export function destroyTable({ table }: { table: TableName }): DestroyTableMigra
       table.toLowerCase() !== 'local_storage',
       `local_storage is used internally by NitromelonDB and can't be destroyed`,
     )
+    // same name rules as tableSchema(), since the name is interpolated into SQL
+    const checkName = (
+      require('../../utils/fp/checkName') as { default: (value: string) => string }
+    ).default
+    checkName(table)
   }
   return { type: 'destroy_table', table }
 }

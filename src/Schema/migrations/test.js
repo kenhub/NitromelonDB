@@ -194,6 +194,9 @@ describe('migration step functions', () => {
     expect(() => destroyTable({})).toThrow('Missing table name')
     expect(() => destroyTable({ table: 'local_storage' })).toThrow('local_storage')
     expect(() => destroyTable({ table: 'LOCAL_Storage' })).toThrow('local_storage')
+    expect(() => destroyTable({ table: 'bad"name' })).toThrow('Unsafe name')
+    expect(() => destroyTable({ table: 'bad name' })).toThrow('Unsafe name')
+    expect(() => destroyTable({ table: 'sqlite_master' })).toThrow('Unsafe name')
   })
 })
 
