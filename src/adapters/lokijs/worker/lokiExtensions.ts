@@ -149,8 +149,13 @@ export function destroyCollection(loki: Loki, name: string): void {
     loki.collections.splice(index, 1)
   }
 
-  // NOTE: This relies on internals of IncrementalIndexedDBAdapter of the exact lokijs version
-  // NitromelonDB depends on (covered by tests against fake-indexeddb)
+  // NOTE: This relies on internals of IncrementalIndexedDBAdapter in the pinned lokijs
+  // (npm:@nozbe/lokijs@1.5.12-wmelon8, src/incremental-indexeddb-adapter.js):
+  // - saveDatabase() opens one "readwrite" transaction, calls _putInChunks(store, ...) inside it
+  //   and calls back with the transaction's error, or none once it completes
+  // - saveDatabase() throws if another operation is in progress, so saves never overlap
+  // - loadDatabase() ignores chunks of collections missing from Loki's metadata, but loads them
+  // Tests in lokijs/migrations.test.js run this against the real adapter on fake-indexeddb
   const adapter = loki.persistenceAdapter
   if (adapter && adapter.mode === 'incremental') {
     if (typeof adapter._putInChunks === 'function' && typeof adapter.saveDatabase === 'function') {
