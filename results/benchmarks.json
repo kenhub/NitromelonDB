@@ -766,5 +766,18 @@
       "ram": 178,
       "fps": 52.6
     }
+  },
+  {
+    "sha": "a388594964c0a40a4ebce8ee75d027c4c9d7bc69",
+    "date": "2026-11-06T17:14:20.809Z",
+    "prNumber": 199,
+    "subject": "docs(install): fix the decorator Babel setup for Expo SDK 56+ and RN 0.87+ (#182) (#199)",
+    "android": {
+      "iterationCount": 5,
+      "score": 95,
+      "cpu": 26.3,
+      "ram": 180,
+      "fps": 54.3
+    }
   }
 ]
